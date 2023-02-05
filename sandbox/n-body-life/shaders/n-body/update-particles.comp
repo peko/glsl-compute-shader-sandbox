@@ -1,0 +1,67 @@
+#version 460 core
+layout(local_size_x = 128) in;
+
+struct Particle {
+  vec4 position;
+  vec4 velocity;
+  vec4 force;
+  float mass;
+  float type;
+};
+
+layout(std430, binding = 0) buffer layout_particles_in {
+  Particle particles_in[];
+};
+
+layout(std430, binding = 1) buffer layout_particles_out {
+  Particle particles_out[];
+};
+
+uniform float dt;
+uniform float box_size;
+uniform float damping;
+uniform float K[16];
+uniform float r[16];
+uniform float R[16];
+
+void main() {
+  uint gidx = gl_GlobalInvocationID.x;
+
+  vec3 position = particles_in[gidx].position.xyz;
+  vec3 velocity = particles_in[gidx].velocity.xyz;
+  float mass = particles_in[gidx].mass;
+  int t1 = int(particles_in[gidx].type);
+  
+  const float G = 1e-5;
+  const float EPS = 1e-4;
+
+  // compute gravitational force
+  vec3 F = vec3(0);
+  for(int i = 0; i < particles_in.length(); ++i) {
+    vec3 v = particles_in[i].position.xyz - position;
+    float l = length(v);
+    int t2 = int(particles_in[i].type);
+    float mnr = r[t1*4+t2]; 
+    float mxr = R[t1*4+t2];
+    if (l>=mnr && l<=mxr) {
+        float a = K[t1*4+t2];
+        // float w = mxr-mnr;
+        // F+= exp(-pow(w/2.0-l,2.0)/w)*v*a;
+        F += a * G * mass * particles_in[i].mass * v / (pow(l,20) + EPS);
+    }
+    if (l<0.004) {
+       F -= v;
+    }
+    
+  }
+
+  // leap-frog scheme
+  vec3 a = F / mass;
+  vec3 velocity_next = (velocity + a * dt)*damping;
+  vec3 position_next = position + velocity_next * dt;
+  particles_out[gidx].position.xyz = mod(position_next-box_size,box_size*2)-box_size;
+  particles_out[gidx].velocity.xyz = velocity_next;
+  particles_out[gidx].mass = mass;
+  particles_out[gidx].force.xyz = F;
+}
+
