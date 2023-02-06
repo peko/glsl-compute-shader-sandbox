@@ -37,28 +37,42 @@ void main() {
 
   // compute gravitational force
   vec3 F = vec3(0);
+  vec3 offsets[7] = {
+    vec3( 0.0,  0.0,  0.0), 
+    vec3( 1.0,  0.0,  0.0), 
+    vec3(-1.0,  0.0,  0.0), 
+    vec3( 0.0,  1.0,  0.0), 
+    vec3( 0.0, -1.0,  0.0),
+    vec3( 0.0,  0.0,  1.0),
+    vec3( 0.0,  0.0, -1.0)
+  };
   for(int i = 0; i < particles_in.length(); ++i) {
-    vec3 v = particles_in[i].position.xyz - position;
-    float l = length(v);
-    int t2 = int(particles_in[i].type);
-    float mnr = r[t1*4+t2]; 
-    float mxr = R[t1*4+t2];
-    if (l>=mnr && l<=mxr) {
-        float a = K[t1*4+t2];
-        // float w = mxr-mnr;
-        // F+= exp(-pow(w/2.0-l,2.0)/w)*v*a;
-        F += a * G * mass * particles_in[i].mass * v / (pow(l,20) + EPS);
+    for(int j=0; j<7; ++j) {
+      vec3 v = particles_in[i].position.xyz - position + box_size*offsets[j]*2;
+      float l = length(v);
+      int t2 = int(particles_in[i].type);
+      // max radius
+      float b = R[t1*4+t2];
+      if(l>b) continue;
+      float a = r[t1*4+t2]; 
+      float c = (a+b)/2.0;
+      float w = K[t1*4+t2]/(b-a)*2.0;
+      if (l<=a) {
+        F+= v*(l-a)*abs(w)*100.0;
+      } else if (a < l && l <= c) {
+        F+= v*(l-a)*w;
+      } else if (c < l && l <= b) {
+        F+= v*(b-l)*w;
+      }
     }
-    if (l<0.004) {
-       F -= v;
-    }
-    
   }
 
   // leap-frog scheme
   vec3 a = F / mass;
+  // vec3 a = F;
   vec3 velocity_next = (velocity + a * dt)*damping;
   vec3 position_next = position + velocity_next * dt;
+  // vec3 position_next = position + F;
   particles_out[gidx].position.xyz = mod(position_next-box_size,box_size*2)-box_size;
   particles_out[gidx].velocity.xyz = velocity_next;
   particles_out[gidx].mass = mass;

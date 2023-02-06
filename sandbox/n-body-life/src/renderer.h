@@ -145,7 +145,7 @@ class Renderer {
           std::sqrt((G * black_hole_mass) / r) *
           (glm::vec3(-std::sin(theta), std::cos(theta), 0));
 
-      data[idx].position = glm::vec4(position, 0);
+      data[idx].position = glm::vec4(position.x, position.y, 0, 0);
       // data[idx].velocity = glm::vec4(velocity, 0);
       data[idx].mass = mass;
       data[idx].type = idx%4;
