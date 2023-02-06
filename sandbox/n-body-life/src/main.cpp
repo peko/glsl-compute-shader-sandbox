@@ -156,10 +156,10 @@ int main() {
       ImGui::Separator();
       ImGui::Text("Node attraction");
       float* K = RENDERER->K;
-      ImGui::DragFloat4("A", &K[ 0], 0.01, -10.0, 10.0, "%.1f");
-      ImGui::DragFloat4("B", &K[ 4], 0.01, -10.0, 10.0, "%.1f");
-      ImGui::DragFloat4("C", &K[ 8], 0.01, -10.0, 10.0, "%.1f");
-      ImGui::DragFloat4("D", &K[12], 0.01, -10.0, 10.0, "%.1f");
+      ImGui::DragFloat4("A", &K[ 0], 0.001, -10.0, 10.0, "%.3f");
+      ImGui::DragFloat4("B", &K[ 4], 0.001, -10.0, 10.0, "%.3f");
+      ImGui::DragFloat4("C", &K[ 8], 0.001, -10.0, 10.0, "%.3f");
+      ImGui::DragFloat4("D", &K[12], 0.001, -10.0, 10.0, "%.3f");
       if (ImGui::Button("Reset weights")) {
         for(int i=0; i<16; i++) K[i] = 0.0;
       }

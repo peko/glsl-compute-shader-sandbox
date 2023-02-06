@@ -58,7 +58,7 @@ void main() {
       float c = (a+b)/2.0;
       float w = K[t1*4+t2]/(b-a)*2.0;
       if (l<=a) {
-        F+= v*(l-a)*abs(w)*100.0;
+        F+= v*(l-a)*100.0;
       } else if (a < l && l <= c) {
         F+= v*(l-a)*w;
       } else if (c < l && l <= b) {
