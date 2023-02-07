@@ -45,6 +45,8 @@ class Particles {
   void draw(const Pipeline& pipeline) const {
     pipeline.activate();
     VAO.activate();
+    // glDrawArrays(GL_LINES, 0, particles->getLength());
+    // glDrawArrays(GL_TRIANGLES, 0, particles->getLength());
     glDrawArrays(GL_POINTS, 0, particles->getLength());
     VAO.deactivate();
     pipeline.deactivate();

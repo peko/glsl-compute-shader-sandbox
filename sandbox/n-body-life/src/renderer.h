@@ -83,9 +83,11 @@ class Renderer {
 
     // NOTE: to use gl_PointSize
     glEnable(GL_PROGRAM_POINT_SIZE);
+    
     // NOTE: blending
     glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
+    // glBlendFunc(GL_ONE, GL_ONE);
+    glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
 
     renderPipeline.attachVertexShader(vertexShader);
     renderPipeline.attachFragmentShader(fragmentShader);
@@ -145,10 +147,11 @@ class Renderer {
           std::sqrt((G * black_hole_mass) / r) *
           (glm::vec3(-std::sin(theta), std::cos(theta), 0));
 
-      data[idx].position = glm::vec4(position.x, position.y, 0, 0);
-      // data[idx].velocity = glm::vec4(velocity, 0);
+      // data[idx].position = glm::vec4(position.x, position.y, 0, 0);
+      data[idx].position = glm::vec4(position.x, position.y, position.z, 0);
+      data[idx].velocity = glm::vec4(velocity, 0);
       data[idx].mass = mass;
-      data[idx].type = idx%4;
+      data[idx].type = idx/(data.size()>>2);
       
     }
 
@@ -193,7 +196,8 @@ class Renderer {
         "viewProjection",
         camera.computeViewProjectionmatrix(resolution.x, resolution.y));
     vertexShader.setUniform("size", particle_size);
-    
+
+    glClearColor(0.8, 0.8, 0.8, 0.5);
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
     particles.draw(renderPipeline);

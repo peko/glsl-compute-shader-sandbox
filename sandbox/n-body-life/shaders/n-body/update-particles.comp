@@ -50,6 +50,9 @@ void main() {
     for(int j=0; j<7; ++j) {
       vec3 v = particles_in[i].position.xyz - position + box_size*offsets[j]*2;
       float l = length(v);
+      
+      if (l==0.0) v+=vec3(sin(v.x*1e8), sin(v.y*1e8), 0.0)/10.0;
+
       int t2 = int(particles_in[i].type);
       // max radius
       float b = R[t1*4+t2];
@@ -58,7 +61,7 @@ void main() {
       float c = (a+b)/2.0;
       float w = K[t1*4+t2]/(b-a)*2.0;
       if (l<=a) {
-        F+= v*(l-a)*100.0;
+        F+= v*(l-a)*10.0;
       } else if (a < l && l <= c) {
         F+= v*(l-a)*w;
       } else if (c < l && l <= b) {
