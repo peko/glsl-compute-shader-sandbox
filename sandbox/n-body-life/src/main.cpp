@@ -126,6 +126,8 @@ int main() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    
+    ImGui::ShowDemoWindow();
 
     ImGui::Begin("UI");
     {
@@ -136,7 +138,7 @@ int main() {
       
       static int N_PARTICLES = RENDERER->getNumberOfParticles();
       if (ImGui::InputInt("N", &N_PARTICLES)) {
-        N_PARTICLES = std::clamp(N_PARTICLES, 0, 10000);
+        N_PARTICLES = std::clamp(N_PARTICLES, 32, 32000);
         RENDERER->setNumberOfParticles(N_PARTICLES);
       }
 

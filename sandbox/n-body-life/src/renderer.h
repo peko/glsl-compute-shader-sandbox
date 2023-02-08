@@ -53,10 +53,22 @@ class Renderer {
         particle_size{5.0},
         dt{0.01f},
         K{
-          -0.1, 0.1, 0.0, 0.0,
-          -0.1,-0.1, 0.1, 0.0,
-           0.0,-0.1,-0.5, 0.1,
-          -0.1,-0.1,-0.1, 0.1
+          0.001, 0.010, 0.000, 0.000,
+          0.000, 0.001, 0.010, 0.000,
+          0.000, 0.000, 0.001, 0.010,
+          0.000, 0.000, 0.000, 0.001
+        },
+        r{
+          0.004, 0.001, 0.004, 0.016,
+          0.008, 0.004, 0.001, 0.004,
+          0.016, 0.008, 0.004, 0.001,
+          0.004, 0.016, 0.008, 0.004
+        },
+        R{
+          0.050, 0.050, 0.050, 0.050,
+          0.050, 0.050, 0.050, 0.050,
+          0.050, 0.050, 0.050, 0.050,
+          0.050, 0.050, 0.050, 0.050
         },
         box_size{0.25},
         damping{0.99},
@@ -72,11 +84,7 @@ class Renderer {
 
     initParticlesPipeline.attachComputeShader(initParticles);
     updateParticlesPipeline.attachComputeShader(updateParticles);
-    for(int i=0;i<16; i++) {
-        r[i] = default_min_radius;
-        R[i] = default_max_radius;
-    }
-
+    
     // data[0].position = glm::vec4(0);
     // data[0].velocity = glm::vec4(0);
     // data[0].mass = black_hole_mass;
@@ -151,7 +159,7 @@ class Renderer {
       data[idx].position = glm::vec4(position.x, position.y, position.z, 0);
       data[idx].velocity = glm::vec4(velocity, 0);
       data[idx].mass = mass;
-      data[idx].type = idx/(data.size()>>2);
+      data[idx].type = idx%4;
       
     }
 
@@ -199,7 +207,8 @@ class Renderer {
 
     glClearColor(0.8, 0.8, 0.8, 1.0);
     // glColorMask(true, true, true, true);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     // glColorMask(true, true, true, false);
 
     glViewport(0, 0, resolution.x, resolution.y);
