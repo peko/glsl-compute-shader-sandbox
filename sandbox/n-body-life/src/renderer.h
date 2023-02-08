@@ -197,8 +197,11 @@ class Renderer {
         camera.computeViewProjectionmatrix(resolution.x, resolution.y));
     vertexShader.setUniform("size", particle_size);
 
-    glClearColor(0.8, 0.8, 0.8, 0.5);
+    glClearColor(0.8, 0.8, 0.8, 1.0);
+    // glColorMask(true, true, true, true);
     glClear(GL_COLOR_BUFFER_BIT);
+    // glColorMask(true, true, true, false);
+
     glViewport(0, 0, resolution.x, resolution.y);
     particles.draw(renderPipeline);
 

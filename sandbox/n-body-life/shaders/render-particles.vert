@@ -80,14 +80,14 @@ vec4 colormap(float x) {
 void main() {
   float x = 1.0 - 0.6 * clamp(10000.0 * length(force), 0.0, 1.0);
   //   base_color = colormap(x).xyz;
-  if (int(type)==0) base_color = vec4(0.5, 1.0, 1.0, 1.0); 
-  if (int(type)==1) base_color = vec4(1.0, 0.5, 1.0, 1.0); 
-  if (int(type)==2) base_color = vec4(1.0, 1.0, 0.5, 1.0); 
-  if (int(type)==3) base_color = vec4(0.5, 0.5, 0.5, 1.0);
+  if (int(type)==0) base_color = vec4(0.2, 1.0, 1.0, 1.0); 
+  if (int(type)==1) base_color = vec4(1.0, 0.2, 1.0, 1.0); 
+  if (int(type)==2) base_color = vec4(1.0, 1.0, 0.2, 1.0); 
+  if (int(type)==3) base_color = vec4(0.7, 0.7, 0.7, 1.0);
 
   gl_Position = viewProjection * vec4(position.xyz, 1.0);
   //   gl_PointSize = size / (1+gl_Position.w*gl_Position.w);
-  float f = gl_Position.w-0.75;
+  float f = gl_Position.w-0.5;
   float f1 = f*f / (1.0 + f*f);
   gl_PointSize = size*(0.5+f1*10.0)/gl_Position.w;
   f1 = f > 0.0 ? f*f / (0.02 + f*f) : f*f / (0.01 + f*f);	

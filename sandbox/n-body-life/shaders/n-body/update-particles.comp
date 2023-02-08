@@ -24,6 +24,10 @@ uniform float K[16];
 uniform float r[16];
 uniform float R[16];
 
+float rand(vec3 co){
+    return fract(sin(dot(co, vec3(12.9898, 78.233, 546.4345))) * 43758.5453);
+}
+
 void main() {
   uint gidx = gl_GlobalInvocationID.x;
 
@@ -47,11 +51,16 @@ void main() {
     vec3( 0.0,  0.0, -1.0)
   };
   for(int i = 0; i < particles_in.length(); ++i) {
+    
+    if(i==gidx) continue;
+    
     for(int j=0; j<7; ++j) {
       vec3 v = particles_in[i].position.xyz - position + box_size*offsets[j]*2;
       float l = length(v);
+      if (l<=0.001) {
+        F +=vec3(sin((v.x+i)*1e8),sin((v.y+i)*1e8),sin((v.z+i)*1e8))/10.0;
+      };
       
-      if (l==0.0) v+=vec3(sin(v.x*1e8), sin(v.y*1e8), 0.0)/10.0;
 
       int t2 = int(particles_in[i].type);
       // max radius
@@ -60,13 +69,16 @@ void main() {
       float a = r[t1*4+t2]; 
       float c = (a+b)/2.0;
       float w = K[t1*4+t2]/(b-a)*2.0;
+      
       if (l<=a) {
-        F+= v*(l-a)*10.0;
+        F+= v*(l-a)*1.0;
       } else if (a < l && l <= c) {
         F+= v*(l-a)*w;
       } else if (c < l && l <= b) {
         F+= v*(b-l)*w;
       }
+
+
     }
   }
 
