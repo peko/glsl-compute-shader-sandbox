@@ -20,9 +20,9 @@ layout(std430, binding = 1) buffer layout_particles_out {
 uniform float dt;
 uniform float box_size;
 uniform float damping;
-uniform float K[16];
-uniform float r[16];
-uniform float R[16];
+uniform float K[36];
+uniform float r[36];
+uniform float R[36];
 
 float rand(vec3 co){
     return fract(sin(dot(co, vec3(12.9898, 78.233, 546.4345))) * 43758.5453);
@@ -65,12 +65,12 @@ void main() {
 
       int t2 = int(particles_in[i].type);
       // max radius
-      float b = R[t1*4+t2];
+      float b = R[t1*6+t2];
       if(l>b) continue;
       
-      float a = r[t1*4+t2]; 
+      float a = r[t1*6+t2]; 
       float c = (a+b)/2.0;
-      float w = K[t1*4+t2]/(b-a)*2.0;
+      float w = K[t1*6+t2]/(b-a)*2.0;
       
       if (l<=a) {
         

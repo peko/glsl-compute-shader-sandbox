@@ -154,43 +154,81 @@ int main() {
       
       ImGui::Separator();
       ImGui::DragFloat("damping", &RENDERER->damping, 0.01, 0.01, 1.0, "%.2f");
-
-      ImGui::Separator();
-      ImGui::Text("Node attraction");
-      float* K = RENDERER->K;
-      ImGui::DragFloat4("A", &K[ 0], 0.001, -10.0, 10.0, "%.3f");
-      ImGui::DragFloat4("B", &K[ 4], 0.001, -10.0, 10.0, "%.3f");
-      ImGui::DragFloat4("C", &K[ 8], 0.001, -10.0, 10.0, "%.3f");
-      ImGui::DragFloat4("D", &K[12], 0.001, -10.0, 10.0, "%.3f");
-      if (ImGui::Button("Reset weights")) {
-        for(int i=0; i<16; i++) K[i] = 0.0;
-      }
-
-      ImGui::Separator();
-      ImGui::Text("Min radius");
-      float* r = RENDERER->r;
-      ImGui::DragFloat4("ra", &r[ 0], 0.001, 0.001, 1.0, "%.3f");
-      ImGui::DragFloat4("rb", &r[ 4], 0.001, 0.001, 1.0, "%.3f");
-      ImGui::DragFloat4("rc", &r[ 8], 0.001, 0.001, 1.0, "%.3f");
-      ImGui::DragFloat4("rd", &r[12], 0.001, 0.001, 1.0, "%.3f");
-      if (ImGui::Button("Reset min radiuses")) {
-        for(int i=0; i<16; i++) r[i] = RENDERER->default_min_radius;
-      }
       
-      ImGui::Separator();
-      ImGui::Text("Max radius");
-      float* R = RENDERER->R;
-      ImGui::DragFloat4("Ra", &R[ 0], 0.001, 0.001, 1.0, "%.3f");
-      ImGui::DragFloat4("Rb", &R[ 4], 0.001, 0.001, 1.0, "%.3f");
-      ImGui::DragFloat4("Rc", &R[ 8], 0.001, 0.001, 1.0, "%.3f");
-      ImGui::DragFloat4("Rd", &R[12], 0.001, 0.001, 1.0, "%.3f");
-      if (ImGui::Button("Reset max radiuses")) {
-        for(int i=0; i<16; i++) R[i] = RENDERER->default_max_radius;
-      }
- 
       if (ImGui::Button("Reset particles")) {
         RENDERER->resetParticles();
       }
+      
+      ImGui::SameLine(); 
+      if(ImGui::Checkbox("3D", &RENDERER->threeD)) {
+        RENDERER->resetParticles();
+      };
+
+      ImGui::Separator();
+      ImGui::Text("Node attraction");
+      
+      float* K = RENDERER->K;
+      if (ImGui::Button("Reset")) {
+        for(int i=0; i<36; i++) K[i] = 0.0;
+      }
+      ImGui::SameLine();
+      if (ImGui::Button("Random")) {
+        for(int i=0; i<36; i++) K[i] = (float(rand())/RAND_MAX*2.0-1.0)/100.0;
+      }
+
+
+      // DragScalarN(const char* label, ImGuiDataType data_type, void* p_data, int components, float v_speed, const void* p_min, const void* p_max, const char* format, float power);
+      float min, max;
+      min = -10.0;
+      max = 10.0;
+      ImGui::DragScalarN("A", ImGuiDataType_Float, &K[ 0], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("B", ImGuiDataType_Float, &K[ 6], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("C", ImGuiDataType_Float, &K[12], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("D", ImGuiDataType_Float, &K[18], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("E", ImGuiDataType_Float, &K[24], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("F", ImGuiDataType_Float, &K[30], 6, 0.0001, &min, &max, "%.4f", 0);
+      
+      ImGui::Separator();
+      ImGui::Text("Min radius");
+      
+      float* r = RENDERER->r;
+      if (ImGui::Button("Reset r")) {
+        for(int i=0; i<36; i++) r[i] = RENDERER->default_min_radius;
+      }
+      ImGui::SameLine();
+      if (ImGui::Button("Random r")) {
+        for(int i=0; i<36; i++) r[i] = (float(rand())/RAND_MAX)*0.01+0.0001;
+      }
+
+      min = 0.001;
+      max = 10.0;
+      ImGui::DragScalarN("ra", ImGuiDataType_Float, &r[ 0], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("rb", ImGuiDataType_Float, &r[ 6], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("rc", ImGuiDataType_Float, &r[12], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("rd", ImGuiDataType_Float, &r[18], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("re", ImGuiDataType_Float, &r[24], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("rf", ImGuiDataType_Float, &r[30], 6, 0.0001, &min, &max, "%.4f", 0);
+      
+      ImGui::Separator();
+      ImGui::Text("Max radius");
+
+      float* R = RENDERER->R;
+      if (ImGui::Button("Reset R")) {
+        for(int i=0; i<36; i++) R[i] = RENDERER->default_max_radius;
+      }
+      ImGui::SameLine();
+      if (ImGui::Button("Random R")) {
+        for(int i=0; i<36; i++) R[i] = (float(rand())/RAND_MAX)*0.1+0.001;
+      }
+
+      ImGui::DragScalarN("Ra", ImGuiDataType_Float, &R[ 0], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("Rb", ImGuiDataType_Float, &R[ 6], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("Rc", ImGuiDataType_Float, &R[12], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("Rd", ImGuiDataType_Float, &R[18], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("Re", ImGuiDataType_Float, &R[24], 6, 0.0001, &min, &max, "%.4f", 0);
+      ImGui::DragScalarN("Rf", ImGuiDataType_Float, &R[30], 6, 0.0001, &min, &max, "%.4f", 0);
+      
+
     }
     ImGui::End();
 

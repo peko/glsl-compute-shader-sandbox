@@ -39,36 +39,44 @@ class Renderer {
   Pipeline renderPipeline;
 
  public:
-  float K[16];
-  float r[16];
-  float R[16];
+  float K[36];
+  float r[36];
+  float R[36];
   float box_size;
   float damping;
   float default_min_radius=0.004;
   float default_max_radius=0.050;
   float particle_size;
+  bool threeD=false;
+
   Renderer()
       : resolution{512, 512},
         nParticles{1000},
         particle_size{5.0},
         dt{0.01f},
         K{
-          0.001, 0.010, 0.000, 0.000,
-          0.000, 0.001, 0.010, 0.000,
-          0.000, 0.000, 0.001, 0.010,
-          0.000, 0.000, 0.000, 0.001
+          0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+          0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+          0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+          0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+          0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+          0.000, 0.000, 0.000, 0.000, 0.000, 0.000
         },
         r{
-          0.004, 0.001, 0.004, 0.016,
-          0.008, 0.004, 0.001, 0.004,
-          0.016, 0.008, 0.004, 0.001,
-          0.004, 0.016, 0.008, 0.004
+          0.005, 0.005, 0.005, 0.005, 0.005, 0.005,
+          0.005, 0.005, 0.005, 0.005, 0.005, 0.005,
+          0.005, 0.005, 0.005, 0.005, 0.005, 0.005,
+          0.005, 0.005, 0.005, 0.005, 0.005, 0.005,
+          0.005, 0.005, 0.005, 0.005, 0.005, 0.005,
+          0.005, 0.005, 0.005, 0.005, 0.005, 0.005
         },
         R{
-          0.050, 0.050, 0.050, 0.050,
-          0.050, 0.050, 0.050, 0.050,
-          0.050, 0.050, 0.050, 0.050,
-          0.050, 0.050, 0.050, 0.050
+          0.050, 0.050, 0.050, 0.050, 0.050, 0.050,
+          0.050, 0.050, 0.050, 0.050, 0.050, 0.050,
+          0.050, 0.050, 0.050, 0.050, 0.050, 0.050,
+          0.050, 0.050, 0.050, 0.050, 0.050, 0.050,
+          0.050, 0.050, 0.050, 0.050, 0.050, 0.050,
+          0.050, 0.050, 0.050, 0.050, 0.050, 0.050
         },
         box_size{0.25},
         damping{0.99},
@@ -94,8 +102,8 @@ class Renderer {
     
     // NOTE: blending
     glEnable(GL_BLEND);
-    // glBlendFunc(GL_ONE, GL_ONE);
-    glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+    glBlendFunc(GL_ONE, GL_ONE);
+    // glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
 
     renderPipeline.attachVertexShader(vertexShader);
     renderPipeline.attachFragmentShader(fragmentShader);
@@ -148,8 +156,9 @@ class Renderer {
       const float mass = 1.0f * 0.5f * (dist(mt) + 1.0f);
       const glm::vec3 position =
           // r * glm::vec3(std::cos(theta), std::sin(theta), 0.1f * dist(mt));
-          r * glm::vec3(std::cos(theta), std::sin(theta), dist(mt));
-          //r * glm::vec3(std::cos(theta), std::sin(theta), 0.0);
+          threeD 
+          ? r * glm::vec3(std::cos(theta), std::sin(theta), dist(mt))
+          : r * glm::vec3(std::cos(theta), std::sin(theta), 0.0);
       const float G = 6.67430e-11;
       const glm::vec3 velocity =
           std::sqrt((G * black_hole_mass) / r) *
@@ -159,7 +168,7 @@ class Renderer {
       data[idx].position = glm::vec4(position.x, position.y, position.z, 0);
       data[idx].velocity = glm::vec4(velocity, 0);
       data[idx].mass = mass;
-      data[idx].type = idx%4;
+      data[idx].type = idx%6;
       
     }
 
@@ -205,7 +214,7 @@ class Renderer {
         camera.computeViewProjectionmatrix(resolution.x, resolution.y));
     vertexShader.setUniform("size", particle_size);
 
-    glClearColor(0.8, 0.8, 0.8, 1.0);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     // glColorMask(true, true, true, true);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -222,9 +231,9 @@ class Renderer {
     updateParticles.setUniform("box_size", box_size);
     updateParticles.setUniform("damping", damping);
 
-    setUniformVector("K", K, 16);
-    setUniformVector("r", r, 16);
-    setUniformVector("R", R, 16);
+    setUniformVector("K", K, 36);
+    setUniformVector("r", r, 36);
+    setUniformVector("R", R, 36);
     
     updateParticlesPipeline.activate();
     glDispatchCompute(std::ceil(nParticles / 128.0f), 1, 1);
