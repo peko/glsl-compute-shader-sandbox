@@ -16,6 +16,7 @@ out vec4 base_color;
 
 uniform mat4 viewProjection;
 uniform float size;
+uniform float focal_distance;
 
 // https://github.com/kbinani/colormap-shaders/blob/master/shaders/glsl/IDL_CB-RdBu.frag
 float colormap_red(float x) {
@@ -89,7 +90,7 @@ void main() {
 
   gl_Position = viewProjection * vec4(position.xyz, 1.0);
   //   gl_PointSize = size / (1+gl_Position.w*gl_Position.w);
-  float f = gl_Position.w-0.5;
+  float f = gl_Position.w-focal_distance;
   float f1 = f*f / (1.0 + f*f);
   gl_PointSize = size*(0.5+f1*10.0)/gl_Position.w;
   f1 = f > 0.0 ? f*f / (0.03 + f*f) : f*f / (0.01 + f*f);	

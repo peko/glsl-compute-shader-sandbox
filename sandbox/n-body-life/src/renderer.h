@@ -21,7 +21,7 @@ class Renderer {
   glm::uvec2 resolution;
   uint32_t nParticles;
   float dt;
-  
+
   Camera camera;
 
   Particles particles;
@@ -48,6 +48,7 @@ class Renderer {
   float default_max_radius=0.050;
   float particle_size;
   bool threeD=false;
+  float focal_distance=1.0;
 
   Renderer()
       : resolution{512, 512},
@@ -213,6 +214,7 @@ class Renderer {
         "viewProjection",
         camera.computeViewProjectionmatrix(resolution.x, resolution.y));
     vertexShader.setUniform("size", particle_size);
+    vertexShader.setUniform("focal_distance", focal_distance);
 
     glClearColor(0.0, 0.0, 0.0, 1.0);
     // glColorMask(true, true, true, true);
@@ -231,6 +233,7 @@ class Renderer {
     updateParticles.setUniform("box_size", box_size);
     updateParticles.setUniform("damping", damping);
 
+    
     setUniformVector("K", K, 36);
     setUniformVector("r", r, 36);
     setUniformVector("R", R, 36);

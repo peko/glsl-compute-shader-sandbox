@@ -41,27 +41,23 @@ void main() {
 
   // compute gravitational force
   vec3 F = vec3(0);
-  vec3 offsets[1] = {
+  vec3 offsets[7] = {
     vec3( 0.0,  0.0,  0.0) 
-    // ,vec3( 1.0,  0.0,  0.0) 
-    // ,vec3(-1.0,  0.0,  0.0) 
-    // ,vec3( 0.0,  1.0,  0.0) 
-    // ,vec3( 0.0, -1.0,  0.0)
-    // ,vec3( 0.0,  0.0,  1.0)
-    // ,vec3( 0.0,  0.0, -1.0)
+    ,vec3( 1.0,  0.0,  0.0) 
+    ,vec3(-1.0,  0.0,  0.0) 
+    ,vec3( 0.0,  1.0,  0.0) 
+    ,vec3( 0.0, -1.0,  0.0)
+    ,vec3( 0.0,  0.0,  1.0)
+    ,vec3( 0.0,  0.0, -1.0)
   };
   for(int i = 0; i < particles_in.length(); ++i) {
     
     if(i==gidx) continue;
     
-    for(int j=0; j<1; ++j) {
+    for(int j=0; j<7; ++j) {
       vec3 v = particles_in[i].position.xyz - position + box_size*offsets[j]*2;
       vec3 n = normalize(v);
       float l = length(v);
-      // if (l<=0.001) {
-      //   F +=vec3(sin((v.x+i)*1e8),sin((v.y+i)*1e8),sin((v.z+i)*1e8))/0.0;
-      // };
-      
 
       int t2 = int(particles_in[i].type);
       // max radius
