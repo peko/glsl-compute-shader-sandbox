@@ -64,6 +64,19 @@ void handleInput(GLFWwindow* window, const ImGuiIO& io) {
   }
 }
 
+static void HelpMarker(const char* desc)
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+
 int main() {
   // init glfw
   glfwSetErrorCallback(glfwErrorCallback);
@@ -127,14 +140,13 @@ int main() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     
-    ImGui::ShowDemoWindow();
+    // ImGui::ShowDemoWindow();
 
     ImGui::Begin("UI");
     {
       ImGui::Text("Framerate: %f", io.Framerate);
 
       ImGui::Separator();
-
       
       static int N_PARTICLES = RENDERER->getNumberOfParticles();
       if (ImGui::InputInt("N", &N_PARTICLES)) {
@@ -163,28 +175,25 @@ int main() {
       if(ImGui::Checkbox("3D", &RENDERER->threeD)) {
         RENDERER->resetParticles();
       };
-      if (RENDERER->threeD) {
-        ImGui::SameLine(); 
-        ImGui::SliderFloat("focal", &RENDERER->focal_distance,0.001, 2.0,"%.4f", 0);
-      }
+      ImGui::SliderFloat("focus", &RENDERER->focal_distance,0.001, 2.0,"%.4f", 0);
 
 
       // Attraction 
       ImGui::Separator();
       ImGui::Text("Node attraction");
+      ImGui::SameLine(); HelpMarker(
+        "Settings of attraction of particles to each other.\n"
+        "Line:column - description:\n"
+        "1:1 - how much a particle of type A is attracted to its kind\n"
+        "1:2 - how much a particle of type A is attracted to particles of type B \n"
+        "...\n"
+        "2:1 - how strongly a type B particle is attracted to type A particles\n"
+        "2:2 - how strongly a particle of type B is attracted to its kind\n"
+        "etc.\n");
       
       float* K = RENDERER->K;
       static float default_attraction = 0.0;
       static float min_max_a[] = {-0.01, 0.01};
-      ImGui::SliderFloat2("min/max a", min_max_a, -10.0, 10.0, "%.4f", ImGuiSliderFlags_Logarithmic);
-      ImGui::SliderFloat("Attr", &default_attraction, min_max_a[0], min_max_a[1], "%.4f", ImGuiSliderFlags_Logarithmic);
-      if (ImGui::Button("Set attr")) {
-        for(int i=0; i<36; i++) K[i] = default_attraction;
-      }
-      ImGui::SameLine();
-      if (ImGui::Button("Random a")) {
-        for(int i=0; i<36; i++) K[i] = (float(rand())/RAND_MAX)*(min_max_a[1]-min_max_a[0])+min_max_a[0];
-      }
 
       ImGui::DragScalarN("A", ImGuiDataType_Float, &K[ 0], 6, 0.0001, &min_max_a[0], &min_max_a[1], "%.4f", 0);
       ImGui::DragScalarN("B", ImGuiDataType_Float, &K[ 6], 6, 0.0001, &min_max_a[0], &min_max_a[1], "%.4f", 0);
@@ -193,14 +202,34 @@ int main() {
       ImGui::DragScalarN("E", ImGuiDataType_Float, &K[24], 6, 0.0001, &min_max_a[0], &min_max_a[1], "%.4f", 0);
       ImGui::DragScalarN("F", ImGuiDataType_Float, &K[30], 6, 0.0001, &min_max_a[0], &min_max_a[1], "%.4f", 0);
       
-      
+      ImGui::SliderFloat2("min/max attr", min_max_a, -10.0, 10.0, "%.4f", ImGuiSliderFlags_Logarithmic);
+      ImGui::SameLine(); HelpMarker("Min and Max limits for matrix cells and random value generator.");
+   
+      ImGui::SliderFloat("attr", &default_attraction, min_max_a[0], min_max_a[1], "%.4f", ImGuiSliderFlags_Logarithmic);
+      if (ImGui::Button("Set all attr")) {
+        for(int i=0; i<36; i++) K[i] = default_attraction;
+      }
+      ImGui::SameLine();
+      if (ImGui::Button("Random attr")) {
+        for(int i=0; i<36; i++) K[i] = (float(rand())/RAND_MAX)*(min_max_a[1]-min_max_a[0])+min_max_a[0];
+      }
+
       // Min radius
       ImGui::Separator();
       ImGui::Text("Min radius");
+      ImGui::SameLine(); HelpMarker("The minimum distance 'r' at which particle A can approach particle B. Then the repulsive force begins to act on it.");
       
       float* r = RENDERER->r;
       static float min_max_r[] = {0.005, 0.02};
       static float default_r = 0.01;
+
+      ImGui::DragScalarN("ra", ImGuiDataType_Float, &r[ 0], 6, 0.0001, &min_max_r[0], &min_max_r[1], "%.4f", 0);
+      ImGui::DragScalarN("rb", ImGuiDataType_Float, &r[ 6], 6, 0.0001, &min_max_r[0], &min_max_r[1], "%.4f", 0);
+      ImGui::DragScalarN("rc", ImGuiDataType_Float, &r[12], 6, 0.0001, &min_max_r[0], &min_max_r[1], "%.4f", 0);
+      ImGui::DragScalarN("rd", ImGuiDataType_Float, &r[18], 6, 0.0001, &min_max_r[0], &min_max_r[1], "%.4f", 0);
+      ImGui::DragScalarN("re", ImGuiDataType_Float, &r[24], 6, 0.0001, &min_max_r[0], &min_max_r[1], "%.4f", 0);
+      ImGui::DragScalarN("rf", ImGuiDataType_Float, &r[30], 6, 0.0001, &min_max_r[0], &min_max_r[1], "%.4f", 0);
+      
       ImGui::SliderFloat2("min/max r", min_max_r, 0.0001, 10.0, "%.4f", ImGuiSliderFlags_Logarithmic);
       ImGui::SliderFloat("r", &default_r, min_max_r[0], min_max_r[1], "%.4f", ImGuiSliderFlags_Logarithmic);
       if (ImGui::Button("Set r")) {
@@ -210,22 +239,24 @@ int main() {
       if (ImGui::Button("Random r")) {
         for(int i=0; i<36; i++) r[i] = (float(rand())/RAND_MAX)*(min_max_r[1]-min_max_r[0])+min_max_r[0];
       }
-
-      ImGui::DragScalarN("ra", ImGuiDataType_Float, &r[ 0], 6, 0.0001, &min_max_r[0], &min_max_r[1], "%.4f", 0);
-      ImGui::DragScalarN("rb", ImGuiDataType_Float, &r[ 6], 6, 0.0001, &min_max_r[0], &min_max_r[1], "%.4f", 0);
-      ImGui::DragScalarN("rc", ImGuiDataType_Float, &r[12], 6, 0.0001, &min_max_r[0], &min_max_r[1], "%.4f", 0);
-      ImGui::DragScalarN("rd", ImGuiDataType_Float, &r[18], 6, 0.0001, &min_max_r[0], &min_max_r[1], "%.4f", 0);
-      ImGui::DragScalarN("re", ImGuiDataType_Float, &r[24], 6, 0.0001, &min_max_r[0], &min_max_r[1], "%.4f", 0);
-      ImGui::DragScalarN("rf", ImGuiDataType_Float, &r[30], 6, 0.0001, &min_max_r[0], &min_max_r[1], "%.4f", 0);
       
 
       // Max radius
       ImGui::Separator();
       ImGui::Text("Max radius");
+      ImGui::SameLine(); HelpMarker("Maximum distance 'R' at which the attraction from the first matrix works. The maximal influence is on the distance (R-r)/2. At distance r and R the influence is 0.");
 
       float* R = RENDERER->R;
       static float default_R = 0.050;
       static float min_max_R[] = {0.01, 0.05};
+
+      ImGui::DragScalarN("Ra", ImGuiDataType_Float, &R[ 0], 6, 0.0001, &min_max_R[0], &min_max_R[1], "%.4f", 0);
+      ImGui::DragScalarN("Rb", ImGuiDataType_Float, &R[ 6], 6, 0.0001, &min_max_R[0], &min_max_R[1], "%.4f", 0);
+      ImGui::DragScalarN("Rc", ImGuiDataType_Float, &R[12], 6, 0.0001, &min_max_R[0], &min_max_R[1], "%.4f", 0);
+      ImGui::DragScalarN("Rd", ImGuiDataType_Float, &R[18], 6, 0.0001, &min_max_R[0], &min_max_R[1], "%.4f", 0);
+      ImGui::DragScalarN("Re", ImGuiDataType_Float, &R[24], 6, 0.0001, &min_max_R[0], &min_max_R[1], "%.4f", 0);
+      ImGui::DragScalarN("Rf", ImGuiDataType_Float, &R[30], 6, 0.0001, &min_max_R[0], &min_max_R[1], "%.4f", 0);
+
       ImGui::SliderFloat2("min/max R", min_max_R, 0.0001, 10.0, "%.4f", ImGuiSliderFlags_Logarithmic);
       ImGui::SliderFloat("R", &default_R, min_max_R[0], min_max_R[1], "%.4f", ImGuiSliderFlags_Logarithmic);
       if (ImGui::Button("Set R")) {
@@ -235,13 +266,6 @@ int main() {
       if (ImGui::Button("Random R")) {
         for(int i=0; i<36; i++) R[i] = (float(rand())/RAND_MAX)*(min_max_R[1]-min_max_R[0])+min_max_R[0];
       }
-
-      ImGui::DragScalarN("Ra", ImGuiDataType_Float, &R[ 0], 6, 0.0001, &min_max_R[0], &min_max_R[1], "%.4f", 0);
-      ImGui::DragScalarN("Rb", ImGuiDataType_Float, &R[ 6], 6, 0.0001, &min_max_R[0], &min_max_R[1], "%.4f", 0);
-      ImGui::DragScalarN("Rc", ImGuiDataType_Float, &R[12], 6, 0.0001, &min_max_R[0], &min_max_R[1], "%.4f", 0);
-      ImGui::DragScalarN("Rd", ImGuiDataType_Float, &R[18], 6, 0.0001, &min_max_R[0], &min_max_R[1], "%.4f", 0);
-      ImGui::DragScalarN("Re", ImGuiDataType_Float, &R[24], 6, 0.0001, &min_max_R[0], &min_max_R[1], "%.4f", 0);
-      ImGui::DragScalarN("Rf", ImGuiDataType_Float, &R[30], 6, 0.0001, &min_max_R[0], &min_max_R[1], "%.4f", 0);
       
 
     }

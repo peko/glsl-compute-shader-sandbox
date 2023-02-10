@@ -25,12 +25,13 @@ class Camera {
   float fov;
   float znear;
   float zfar;
+  glm::vec3 velocity;
 
   float movementSpeed;
   float lookAroundSpeed;
 
-  float phi;
-  float theta;
+  float phi, phi_;
+  float theta, theta_;
 
  public:
   Camera()
@@ -43,8 +44,9 @@ class Camera {
         zfar{10000.0f},
         movementSpeed{1.0f},
         lookAroundSpeed{0.1f},
-        phi{270.0f},
-        theta{90.0f} {}
+        phi_{270.0f}, phi{270.0f},
+        theta_{90.0f}, theta{90.0f} 
+        {}
 
   glm::mat4 computeViewMatrix() const {
     return glm::lookAt(camPos, camPos + camForward, camUp);
@@ -62,47 +64,59 @@ class Camera {
   void reset() { *this = Camera(); }
 
   void move(const CameraMovement& direction, float dt) {
-    const float velocity = movementSpeed * dt;
+    dt*=0.005;
     switch (direction) {
       case CameraMovement::FORWARD:
-        camPos += velocity * camForward;
+        velocity += dt*camForward;
         break;
       case CameraMovement::BACKWARD:
-        camPos -= velocity * camForward;
+        velocity -= dt*camForward;
         break;
       case CameraMovement::RIGHT:
-        camPos += velocity * camRight;
+        velocity += dt*camRight;
         break;
       case CameraMovement::LEFT:
-        camPos -= velocity * camRight;
+        velocity -= dt*camRight;
         break;
       case CameraMovement::UP:
-        camPos += velocity * camUp;
+        velocity += dt*camUp;
         break;
       case CameraMovement::DOWN:
-        camPos -= velocity * camUp;
+        velocity -= dt*camUp;
         break;
     }
   }
 
-  void lookAround(float d_phi, float d_theta) {
-    // update phi, theta
-    phi += lookAroundSpeed * d_phi;
-    if (phi < 0.0f) phi = 360.0f;
-    if (phi > 360.0f) phi = 0.0f;
+  void update() {
+    // std::cout << velocity <<std::endl;
+    camPos += velocity;
+    velocity = 0.995f *  velocity;
 
-    theta += lookAroundSpeed * d_theta;
-    if (theta < 0.0f) theta = 180.0f;
-    if (theta > 180.0f) theta = 0.0f;
+    phi   -= (phi  -phi_  )/100.0f;
+    theta -= (theta-theta_)/100.0f;
 
     // set camera directions
-    const float phiRad = glm::radians(phi);
+    const float phiRad   = glm::radians(phi);
     const float thetaRad = glm::radians(theta);
+    
     camForward =
         glm::vec3(std::cos(phiRad) * std::sin(thetaRad), std::cos(thetaRad),
                   std::sin(phiRad) * std::sin(thetaRad));
     camRight = glm::normalize(glm::cross(camForward, glm::vec3(0, 1.0f, 0)));
     camUp = glm::normalize(glm::cross(camRight, camForward));
+
+  }
+
+  void lookAround(float d_phi, float d_theta) {
+    // update phi, theta
+    phi_ += lookAroundSpeed * d_phi;
+    if (phi_ <   0.0f) phi_ = 360.0f;
+    if (phi_ > 360.0f) phi_ = 0.0f;
+
+    theta_ += lookAroundSpeed * d_theta;
+    if (theta_ <   0.0f) theta_ = 180.0f;
+    if (theta_ > 180.0f) theta_ = 0.0f;
+
   }
 
   void getRay(const glm::vec2& window, const glm::uvec2& resolution,

@@ -209,6 +209,8 @@ class Renderer {
   }
   
   void render() {
+
+    camera.update();
     // render particles
     vertexShader.setUniform(
         "viewProjection",
@@ -216,7 +218,7 @@ class Renderer {
     vertexShader.setUniform("size", particle_size);
     vertexShader.setUniform("focal_distance", focal_distance);
 
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(0.0, 0.05, 0.1, 1.0);
     // glColorMask(true, true, true, true);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

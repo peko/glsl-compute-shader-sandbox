@@ -93,6 +93,7 @@ void main() {
   float f = gl_Position.w-focal_distance;
   float f1 = f*f / (1.0 + f*f);
   gl_PointSize = size*(0.5+f1*10.0)/gl_Position.w;
-  f1 = f > 0.0 ? f*f / (0.03 + f*f) : f*f / (0.01 + f*f);	
+  f1 = f > 0.0 ? f*f / (0.05 + f*f) : f*f / (0.025 + f*f);	
+  //   f1 = f > 0.0 ? f*f / (0.03 + f*f) : f*f / (0.01 + f*f);	
   base_color = base_color*(1.0-f1);
 }
