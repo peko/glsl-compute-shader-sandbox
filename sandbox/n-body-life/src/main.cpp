@@ -199,7 +199,7 @@ int main() {
       ImGui::Text("Min radius");
       
       float* r = RENDERER->r;
-      static float min_max_r[] = {0.01, 0.05};
+      static float min_max_r[] = {0.005, 0.02};
       static float default_r = 0.01;
       ImGui::SliderFloat2("min/max r", min_max_r, 0.0001, 10.0, "%.4f", ImGuiSliderFlags_Logarithmic);
       ImGui::SliderFloat("r", &default_r, min_max_r[0], min_max_r[1], "%.4f", ImGuiSliderFlags_Logarithmic);
