@@ -13,6 +13,7 @@
 #include "gcss/vertex-array-object.h"
 //
 #include "particles.h"
+#include "clear_plane.h"
 
 using namespace gcss;
 
@@ -36,7 +37,14 @@ class Renderer {
 
   VertexShader vertexShader;
   FragmentShader fragmentShader;
+
+  VertexShader clearVert;
+  FragmentShader clearFrag;
+
+  Quad clearPlane;
   Pipeline renderPipeline;
+  Pipeline clearPipeline;
+
 
  public:
   float K[36];
@@ -81,14 +89,15 @@ class Renderer {
         },
         box_size{0.25},
         damping{0.99},
-        initParticles{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                      "shaders" / "n-body" / "init-particles.comp"},
-        updateParticles{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                        "shaders" / "n-body" / "update-particles.comp"},
-        vertexShader{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                     "shaders" / "render-particles.vert"},
-        fragmentShader{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                       "shaders" / "render-particles.frag"} {
+        initParticles  {std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" / "n-body" / "init-particles.comp"},
+        updateParticles{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" / "n-body" / "update-particles.comp"},
+        vertexShader   {std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" / "render-particles.vert"},
+        fragmentShader {std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" / "render-particles.frag"},
+        clearVert      {std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" / "clear.vert"},
+        clearFrag      {std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" / "clear.frag"} 
+   
+  {
+    
     particles.setParticles(&particlesIn);
 
     initParticlesPipeline.attachComputeShader(initParticles);
@@ -108,6 +117,9 @@ class Renderer {
 
     renderPipeline.attachVertexShader(vertexShader);
     renderPipeline.attachFragmentShader(fragmentShader);
+
+    clearPipeline.attachVertexShader(clearVert);
+    clearPipeline.attachFragmentShader(clearFrag);
 
     // generate particles
     placeParticlesCircular();
@@ -208,9 +220,27 @@ class Renderer {
     glProgramUniform1fv(program, location, length, vector);
   }
   
+  inline void clearScreen() {
+
+
+    glClearColor(0.0, 0.05, 0.1, 1.0);
+    glColorMask(true, true, true, true);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    // glBlendFunc(GL_ONE, GL_ONE);
+    // glBlendEquation(GL_FUNC_REVERSE_SUBTRACT);  
+    // clearPlane.draw(clearPipeline);     
+
+    // glColorMask(true, true, true, false);
+
+  }
+
   void render() {
 
+    glViewport(0, 0, resolution.x, resolution.y);
+
     camera.update();
+
     // render particles
     vertexShader.setUniform(
         "viewProjection",
@@ -218,13 +248,11 @@ class Renderer {
     vertexShader.setUniform("size", particle_size);
     vertexShader.setUniform("focal_distance", focal_distance);
 
-    glClearColor(0.0, 0.05, 0.1, 1.0);
-    // glColorMask(true, true, true, true);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    clearScreen();
 
-    // glColorMask(true, true, true, false);
-
-    glViewport(0, 0, resolution.x, resolution.y);
+    glBlendEquation(GL_FUNC_ADD);  
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE); 
+    glBlendFunc(GL_ONE, GL_ONE); 
     particles.draw(renderPipeline);
 
     // update particles
@@ -235,7 +263,6 @@ class Renderer {
     updateParticles.setUniform("box_size", box_size);
     updateParticles.setUniform("damping", damping);
 
-    
     setUniformVector("K", K, 36);
     setUniformVector("r", r, 36);
     setUniformVector("R", R, 36);

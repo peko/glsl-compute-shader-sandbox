@@ -1,2 +1,3 @@
 .vscode/
 build/
+sandbox/n-body-barnes-hut-cuda/ecl-bh
